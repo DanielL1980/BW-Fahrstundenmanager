@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Tablet Erfassung</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { touch-action: manipulation; }
+        .active-gruen { background-color: #22c55e !important; color: white; border-color: #166534; }
+        .active-gelb { background-color: #eab308 !important; color: white; border-color: #854d0e; }
+        .active-rot { background-color: #ef4444 !important; color: white; border-color: #991b1b; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans pb-24">
+
+    <div class="sticky top-0 z-50 bg-white shadow-md p-4 mb-4">
+        <div class="max-w-xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">Tablet Erfassung</h1>
+            <input type="text" id="schuelerID" placeholder="Fahrschüler ID" class="p-2 border rounded text-sm w-40 font-bold bg-gray-50">
+        </div>
+    </div>
+
+    <div class="max-w-xl mx-auto p-4 space-y-3" id="mainList">
+        </div>
+
+    <div class="fixed bottom-0 left-0 right-0 bg-white p-4 border-t shadow-lg flex justify-center">
+        <button onclick="downloadData()" class="w-full max-w-xl bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg text-lg uppercase">
+            💾 JSON Speichern
+        </button>
+    </div>
+
+    <script>
+        const inhalte = ["Einweisung in das Ausbildungsfahrzeug","Techn. Durchsichten (vor, während, nach der Benutzung)","Ladungssicherung (Ladung, Zubehör und pers. Ausrüstung)","Fahrtechn. Vorbereitungen (Sitz/Spiegel / Lenkrad/Gurt)","Handhabung der Bedienungseinrichtung","Bedienung EG-Kontrollgerät","Anfahr-, Schalt- und Lenkübungen","Fahren mit geringer Geschwindigkeit","Abbremsen aus geringer Geschwindigkeit","Rückwärtsfahren mit Einweiser / Sicherungsposten","An- und Abkuppeln des Anhängers","Maßnahmen beim Verlassen des Fahrzeugs","Verhalten beim Anfahren (Ebene/Steigung/Gefälle)","Gangwechsel","Fahrbahnbenutzung (Kurven/ein- und mehrspurig)","Abbiegen an Kreuzungen / Einmündungen","Fahrstreifenwechsel","Beobachtung Verkehrsraum","Beachten der Verkehrszeichen und -einrichtungen","Geschwindigkeit (Straßen-/Verkehrsverhältnisse)","Sicherheitsabstände","Überholen und Vorbeifahren","Regelung durch Lichtzeichen oder Polizeibeamte","mit und ohne Verkehrszeichen","Verhalten am und im Kreisverkehr","Verhalten an Bahnübergängen","Verhalten gegenüber Fußgängern und Radfahrern","Verhalten an Fußgängerüberwegen","Verhalten in verkehrsberuhigten Bereichen","Haltende öffentliche Verkehrsmittel u. Schulbusse","Durchfahren von Engstellen","Benutzung der Warneinrichtungen","Maßnahmen zur Sicherung liegengebliebener fzg","Wenden und Rückwärtsfahren mit und ohne Anhänger","Fahren auf Feld-, Wald-, und Wiesenwegen","Fahren auf unterschiedlichen Bodenverhältnissen","Materialschonendes Fahren","Geschwindigkeit und Gangwahl","Fahren ohne und mit Geländegang / Getriebesperren","Befahren von Fahrspuren, Lenkradhaltung","Gefahrbremsung auf unbefestigten Wegen (mit ABV)","Ausweichen von Hindernissen","Befahren von Steigungen und Gefällen","Überwinden von Querrinnen / Bodenunebenheiten","Geländebeurteilung /-ausnutzung","Rückwärtsfahren in eine Parklücke (Längsaufstellung)","Rückwärts quer oder schräg einparken","Fahren nach rechts rückwärts unter Ausnutzung einer Einmündung, Kreuzung oder Einfahrt","Rückwärtsfahren und Versetzen nach rechts an eine Rampe zum Be- oder Entladen","Abfahrtkontrolle (Sachgebiete 1-6)","Rückwärtsfahren geradeaus an eine Rampe zum Be- oder Entladen","Umkehren durch Rückwärtsfahren nach links","Sicherheitskontrolle","Verbinden und Trennen von Fahrzeugen","Abstellen des Anhängers","Vorausschauendes Fahren","Beobachtung anderer Verkehrsteilnehmer","Beobachtung des Fahrverhaltens anderer fzfhr","Beobachtung des Verkehrsraums","Bremsen in Gefahrensituationen","Schulung auf Bundes- oder Landstraßen","Schulung auf Autobahnen","Schulung bei Dämmerung oder Dunkelheit","Verhalten in komplizierten Verkehrssituationen","Vermeiden risikoreicher Verkehrssituationen","Fahren in unbekannten Verkehrsräumen","Fahren unter Prüfungsbedingungen","Feststellen der Prüfungsreife","Einweisertätigkeit bei Tag","Einweisertätigkeit bei Nacht"];
+        
+        let evaluations = {};
+
+        function buildList() {
+            const list = document.getElementById('mainList');
+            list.innerHTML = '';
+            inhalte.forEach((txt, i) => {
+                const nr = i + 1;
+                const row = document.createElement('div');
+                row.className = "bg-white p-4 rounded-xl shadow-sm border flex flex-col gap-3";
+                row.innerHTML = `
+                    <div class="flex gap-3 items-start">
+                        <span class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded text-sm">${nr}</span>
+                        <span class="text-sm font-medium leading-snug">${txt}</span>
+                    </div>
+                    <div class="flex gap-2 mt-1">
+                        <button onclick="setVal(${nr}, 'rot')" id="b-${nr}-rot" class="flex-1 py-3 text-xs font-black border rounded-lg bg-gray-50 text-gray-400">ROT</button>
+                        <button onclick="setVal(${nr}, 'gelb')" id="b-${nr}-gelb" class="flex-1 py-3 text-xs font-black border rounded-lg bg-gray-50 text-gray-400">GELB</button>
+                        <button onclick="setVal(${nr}, 'gruen')" id="b-${nr}-gruen" class="flex-1 py-3 text-xs font-black border rounded-lg bg-gray-50 text-gray-400">GRÜN</button>
+                    </div>
+                `;
+                list.appendChild(row);
+            });
+        }
+
+        function setVal(nr, color) {
+            ['rot', 'gelb', 'gruen'].forEach(c => document.getElementById(`b-${nr}-${c}`).className = "flex-1 py-3 text-xs font-black border rounded-lg bg-gray-50 text-gray-400");
+            document.getElementById(`b-${nr}-${color}`).className = `flex-1 py-3 text-xs font-black border rounded-lg active-${color}`;
+            evaluations[nr] = color;
+        }
+
+        function downloadData() {
+            const name = document.getElementById('schuelerID').value || "Unbekannt";
+            const data = { schuelerIDs: [name], alleFahrten: [{ schuelerId: name, datum: new Date().toISOString() }] };
+            Object.keys(evaluations).forEach(k => { 
+                data.alleFahrten[0][`item_${k}`] = evaluations[k];
+                if (k == 69 || k == 70) data.alleFahrten[0][`item_${k}_minuten`] = 45; // Zeitstempel für Einweiser
+            });
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `Fahrt_${name}_${new Date().getTime()}.json`;
+            a.click();
+        }
+
+        buildList();
+    </script>
+</body>
+</html>
